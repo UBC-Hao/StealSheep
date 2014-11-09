@@ -1,6 +1,7 @@
 package com.github.takasab.Request;
 
 import com.github.takasab.Game.Game;
+import com.github.takasab.Game.User;
 import com.github.takasab.GameProcess.RepeatingRequest;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -28,9 +29,14 @@ public class CarryRequst extends RepeatingRequest{
                        e.printStackTrace();
                    }
                    if(game.contains(p)){
+                       User user = new User(p);
                        if((p.getItemInHand()==null)||(p.getItemInHand().getType()!= Material.SADDLE)) {
                           if (p.getPassenger() != null){
-                             p.getPassenger().eject();
+                             user.leaveSheep();
+                          }
+                       }else if(p.getItemInHand().getType()==Material.SADDLE){
+                          if(p.getPassenger()!=null){
+                              user.spiltExp(user.getPassagerNum(),3);
                           }
                        }
                    }else{
