@@ -1,6 +1,7 @@
 package com.github.takasab.Game;
 
 import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -22,11 +23,9 @@ public class ColorTool {
                case 2: return Color.PURPLE;
                case 3: return Color.AQUA;
                case 4: return Color.YELLOW;
-               case 10: return Color.PURPLE;
-               case 5: return GREEN;
+               case 5: return Color.GREEN;
                case 15 : return Color.BLACK;
                case 14: return Color.RED;
-               case 13: return GREEN;
            }
        }else if(item.getType()==Material.LEATHER){
            LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
@@ -34,18 +33,36 @@ public class ColorTool {
        }
         return Color.BLACK;
     }
-    public static short getColorID(Color color){
-        switch (color){
-            case WHITE: return 0;
-            case PURPLE : return 2;
-            case AQUA : return 3;
-            case YELLOW : return 4;
-            case PURPLE : return  10;
-            case GREEN : return 5;
-            case BLACK: return 15;
-            case RED : return 14;
-            case GREEN : return 13;
-        }
+    public static short getColorID(final Color color){
+        if(color .equals( WHITE )) return 0;
+        if(color .equals( PURPLE )) return 2;
+        if(color .equals( AQUA)) return 3;
+        if(color .equals( YELLOW)) return 4;
+        if(color .equals( GREEN)) return 5;
+        if(color .equals( BLACK)) return 15;
+        if(color .equals(RED)) return 14;
         return 0;
+    }
+    public static Color getByID(short id){
+               switch (id){
+               case 0: return Color.WHITE;
+               case 2: return Color.PURPLE;
+               case 3: return Color.AQUA;
+               case 4: return Color.YELLOW;
+               case 5: return Color.GREEN;
+               case 15 : return Color.BLACK;
+               case 14: return Color.RED;
+           }
+               return Color.WHITE;
+    }
+    public static DyeColor toDyeColor(Color color){
+        if(color .equals( WHITE )) return DyeColor.WHITE;
+        if(color .equals( PURPLE )) return DyeColor.PURPLE;
+        if(color .equals( AQUA)) return DyeColor.BLUE;
+        if(color .equals( YELLOW)) return DyeColor.YELLOW;
+        if(color .equals( GREEN)) return DyeColor.GREEN;
+        if(color .equals( BLACK)) return DyeColor.BLACK;
+        if(color .equals(RED)) return DyeColor.RED;
+        return DyeColor.WHITE;
     }
 }

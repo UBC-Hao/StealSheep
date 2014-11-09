@@ -1,7 +1,6 @@
 package com.github.takasab.Game;
 
 import org.bukkit.Color;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -38,7 +37,7 @@ public class User {
         PlayerInventory inventory=player.getInventory();
         ItemStack hat = inventory.getHelmet();
         if(hat ==null) return Color.WHITE;
-        if(hat.getType() != Material.LEATHER) return Color.WHITE;
+        if(hat.getType() != Material.LEATHER_HELMET) return Color.WHITE;
         return ((LeatherArmorMeta)hat.getItemMeta()).getColor();
     }
     public int getPassagerNum(){
@@ -51,15 +50,23 @@ public class User {
         ItemStack item = new ItemStack(35);
         item . setDurability(ColorTool.getColorID(color));
         player.getInventory().setItem(getPassagerNum()+3,item);
+        System.out.print(getPassagerNum()+3);
+        player.updateInventory();
 
         Easycounter c = new Easycounter();
+        if(c.getSheep(player) == null){
+            player.setPassenger(sheep);
+        }else{
         c.getSheep(player).setPassenger(sheep);
+        }
+        
     }
-    public void leaveSheep(){
+    public synchronized void leaveSheep(){
       Easycounter c = new Easycounter();
       c.leaveAll(player);
     }
-    public void leaveWithColor(){
+    public synchronized void leaveWithColor(){
+        System.out.print("leave with color");
        Easycounter c = new Easycounter();
        c.leaveAll(player,getColor());
     }
@@ -75,16 +82,20 @@ class Easycounter{
         return passgernum;
     }
     public void leaveAll(Entity le){
+        
         if(le.getPassenger()!=null){
-            le.getPassenger().eject();
-            leaveAll(le.getPassenger());
+            Entity passager = le.getPassenger();
+            le.eject();
+            leaveAll(passager);
         }
     }
     public void leaveAll(Entity le,Color color){
         if(le.getPassenger()!=null){
-            ((Sheep)le.getPassenger()).setColor(DyeColor.getByColor(color));
-            le.getPassenger().eject();
-            leaveAll(le.getPassenger(),color);
+            ((Sheep)le.getPassenger()).setColor(ColorTool.toDyeColor(color));
+            
+            Entity entity = le.getPassenger();
+            le.eject();
+            leaveAll(entity,color);
         }
     }
     public Sheep getSheep(Entity entity){

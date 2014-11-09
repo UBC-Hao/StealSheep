@@ -3,7 +3,6 @@ package com.github.takasab.Game;
 import com.github.takasab.GameProcess.Request;
 import com.github.takasab.Request.CarryRequst;
 import com.github.takasab.Request.GameStartRequest;
-import com.github.takasab.Request.GameStopRequest;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -45,9 +44,6 @@ public class Game {
         for(Player p:getPlayers()){
             left(p);
         }
-
-        Request req = new GameStopRequest(this);
-        GamePool.pushRequst(req);
     }
 
 }

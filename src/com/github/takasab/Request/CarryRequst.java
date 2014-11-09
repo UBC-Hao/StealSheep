@@ -5,6 +5,8 @@ import com.github.takasab.Game.User;
 import com.github.takasab.GameProcess.RepeatingRequest;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /*
  *@author:yudi
@@ -33,14 +35,14 @@ public class CarryRequst extends RepeatingRequest{
                        if((p.getItemInHand()==null)||(p.getItemInHand().getType()!= Material.SADDLE)) {
                           if (p.getPassenger() != null){
                              user.leaveSheep();
+                             System.out.print("leave");
                           }
                        }else if(p.getItemInHand().getType()==Material.SADDLE){
                           if(p.getPassenger()!=null){
                               user.spiltExp(user.getPassagerNum(),3);
+                              p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,2*20,user.getPassagerNum()-1));
                           }
                        }
-                   }else{
-                       break;
                    }
                }
            }

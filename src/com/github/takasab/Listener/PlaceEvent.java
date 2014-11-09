@@ -2,9 +2,10 @@ package com.github.takasab.Listener;
 
 import com.github.takasab.Game.ColorTool;
 import com.github.takasab.Game.User;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Sheep;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 /*
@@ -13,15 +14,19 @@ import org.bukkit.event.player.PlayerMoveEvent;
  *@Twitter:yudi_327
  (○´∀｀○)ﾉ
  */
-public class PlaceEvent {
+public class PlaceEvent implements Listener{
 /*Link start!*/
     @EventHandler
     void onWalk(PlayerMoveEvent event){
         Player p = event.getPlayer();
         if(p.getPassenger()==null) return;
         User user = new User(p);
-        if(ColorTool.getColor(p.getLocation().getBlock().getState().getData().toItemStack())==user.getColor()){
-        if(p.getPassenger() instanceof Sheep){
+        System.out.print("listen");
+        System.out.print(p.getLocation().getBlock().getRelative(0, -1, 0).getData());
+        System.out.print(ColorTool.getColorID(user.getColor()));
+        if(p.getLocation().getBlock().getRelative(0, -1, 0).getData()==(ColorTool.getColorID(user.getColor()))){
+        if(p.getPassenger().getType() == EntityType.SHEEP){
+            System.out.print("drop");
             user.leaveWithColor();
         }
         }

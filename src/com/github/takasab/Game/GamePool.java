@@ -25,4 +25,10 @@ public class GamePool {
         }
         return null;
     }
+    public static Game createGame(){
+       Game game = new Game();
+        list.add(game);
+    return game;
+    
+    }
 }
