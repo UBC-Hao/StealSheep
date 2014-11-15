@@ -13,5 +13,6 @@ public class Main extends JavaPlugin{
        Bukkit.getPluginManager().registerEvents(new CrraySheep(), this);
        Bukkit.getPluginManager().registerEvents(new PlaceEvent(), this);
        Bukkit.getPluginManager().registerEvents(new TestCommand(), this);
+       Bukkit.getPluginManager().registerEvents(new PlaceEvent(),this);
    }
 }

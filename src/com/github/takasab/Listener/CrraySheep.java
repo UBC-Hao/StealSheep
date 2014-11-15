@@ -2,10 +2,13 @@ package com.github.takasab.Listener;
 
 import com.github.takasab.Game.GamePool;
 import com.github.takasab.Game.User;
+import org.bukkit.DyeColor;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Sheep;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.potion.PotionEffectType;
 
 
 /*
@@ -25,8 +28,21 @@ public class CrraySheep implements Listener{
             User user = new User(event.getPlayer());
             if(user.isHandItem("神奇的马鞍")){
                 if(event.getRightClicked() instanceof Sheep) {
+                    Sheep target = (Sheep) event.getRightClicked();
+                    if(target.getColor()== DyeColor.BLACK){
+                        target.getWorld().createExplosion(target.getLocation(),0);
+                        event.getPlayer().damage(5D);
+                        return;
+                    }
+                    if(target.getColor()==DyeColor.getByColor(user.getColor())){
+                        return;
+                    }
+
                     System.out.print("add");
                     user.addSheep((Sheep)event.getRightClicked());
+                    try {
+                        ((LivingEntity) event.getRightClicked()).removePotionEffect(PotionEffectType.SLOW);
+                    }catch (Exception e){}
                 }
             }
         }

@@ -1,13 +1,16 @@
 package com.github.takasab.Listener;
 
 import com.github.takasab.Game.GamePool;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.inventory.ItemStack;
 
 /*
  *@author:yudi
@@ -39,6 +42,15 @@ public class ProtectListener implements Listener{
     void onClick(InventoryClickEvent event){
         if(GamePool.getPlayerIn((Player)event.getWhoClicked())!=null){
             event.getWhoClicked().closeInventory();
+        }
+    }
+    @EventHandler
+    void onShoot(EntityShootBowEvent event){
+        if(event.getEntity() instanceof  Player){
+            Player p = (Player) event.getEntity();
+            if(GamePool.getPlayerIn(p)==null) return;
+            p.getInventory().setItem(15,new ItemStack(Material.ARROW,16));
+            p.updateInventory();
         }
     }
 

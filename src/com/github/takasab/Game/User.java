@@ -3,11 +3,14 @@ package com.github.takasab.Game;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /*
  *@author:yudi
@@ -32,6 +35,12 @@ public class User {
         if(!player.getItemInHand().getItemMeta().hasDisplayName()) return false;
         if(player.getItemInHand().getItemMeta().getDisplayName().contains(name)) return true;
         return false;
+    }
+    public void addScore(int amount){
+        GamePool.addPoint(player,amount);
+    }
+    public void clearScore(){
+        GamePool.clearPlayerScores(player);
     }
     public Color getColor(){
         PlayerInventory inventory=player.getInventory();
@@ -67,16 +76,18 @@ public class User {
         clearWool();
     }
     public synchronized void leaveWithColor(){
-        System.out.print("leave with color");
+       System.out.print("leave with color");
        Easycounter c = new Easycounter();
        c.leaveAll(player,getColor());
-        clearWool();
+       clearWool();
+       this.addScore(this.getPassagerNum());
     }
     void clearWool(){
         player.getInventory().clear(3);
         player.getInventory().clear(4);
         player.getInventory().clear(5);
         player.getInventory().clear(6);
+        player.updateInventory();
     }
 }
 class Easycounter{
@@ -100,7 +111,7 @@ class Easycounter{
     public void leaveAll(Entity le,Color color){
         if(le.getPassenger()!=null){
             ((Sheep)le.getPassenger()).setColor(ColorTool.toDyeColor(color));
-            
+            ((LivingEntity)le).addPotionEffect( new PotionEffect(PotionEffectType.SLOW,Integer.MAX_VALUE,20*60*5));
             Entity entity = le.getPassenger();
             le.eject();
             leaveAll(entity,color);
