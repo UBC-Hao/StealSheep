@@ -64,11 +64,19 @@ public class User {
     public synchronized void leaveSheep(){
       Easycounter c = new Easycounter();
       c.leaveAll(player);
+        clearWool();
     }
     public synchronized void leaveWithColor(){
         System.out.print("leave with color");
        Easycounter c = new Easycounter();
        c.leaveAll(player,getColor());
+        clearWool();
+    }
+    void clearWool(){
+        player.getInventory().clear(3);
+        player.getInventory().clear(4);
+        player.getInventory().clear(5);
+        player.getInventory().clear(6);
     }
 }
 class Easycounter{
