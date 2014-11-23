@@ -43,6 +43,8 @@ public class CarryRequst extends RepeatingRequest{
                               p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,2*20,user.getPassagerNum()-1));
                           }
                        }
+                   }else{
+                       return;
                    }
                }
            }

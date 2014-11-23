@@ -7,10 +7,11 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.HashMap;
 
 /*
  *@author:yudi
@@ -20,6 +21,7 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class User {
 /*Link start!*/
+    static HashMap<Player,Color> hm = new HashMap<Player, Color>();
     Player player;
     public User(Player player){
         this.player=player;
@@ -36,6 +38,9 @@ public class User {
         if(player.getItemInHand().getItemMeta().getDisplayName().contains(name)) return true;
         return false;
     }
+    public int getScore(){
+       return GamePool.getPoint(player);
+    }
     public void addScore(int amount){
         GamePool.addPoint(player,amount);
     }
@@ -43,30 +48,35 @@ public class User {
         GamePool.clearPlayerScores(player);
     }
     public Color getColor(){
-        PlayerInventory inventory=player.getInventory();
-        ItemStack hat = inventory.getHelmet();
-        if(hat ==null) return Color.WHITE;
-        if(hat.getType() != Material.LEATHER_HELMET) return Color.WHITE;
-        return ((LeatherArmorMeta)hat.getItemMeta()).getColor();
+        return hm.get(player);
+    }
+    public void setColor(Color color){
+        ItemStack item = new ItemStack(Material.LEATHER_HELMET);
+        LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
+        meta.setColor(color);
+        item.setItemMeta(meta);
+        hm.put(player,color);
+        player.getInventory().setHelmet(item);
     }
     public int getPassagerNum(){
         Easycounter easycounter = new Easycounter();
         return easycounter.getPassagerNumber(player);
     }
-    public void addSheep(Sheep sheep){
-        if(getPassagerNum()==3) return;
-        final Color color = sheep.getColor().getColor();
+    public synchronized void addSheep(Sheep sheep){
+        if(getPassagerNum()>=3) return;
         ItemStack item = new ItemStack(35);
-        item . setDurability(ColorTool.getColorID(color));
+        item . setDurability(ColorTool.getDyeToColorID(sheep.getColor()));
+        
         player.getInventory().setItem(getPassagerNum()+3,item);
         System.out.print(getPassagerNum()+3);
         player.updateInventory();
 
         Easycounter c = new Easycounter();
+        if(getPassagerNum()>=3) return;
         if(c.getSheep(player) == null){
             player.setPassenger(sheep);
         }else{
-        c.getSheep(player).setPassenger(sheep);
+            c.getSheep(player).setPassenger(sheep);
         }
         
     }
@@ -111,12 +121,13 @@ class Easycounter{
     public void leaveAll(Entity le,Color color){
         if(le.getPassenger()!=null){
             ((Sheep)le.getPassenger()).setColor(ColorTool.toDyeColor(color));
-            ((LivingEntity)le).addPotionEffect( new PotionEffect(PotionEffectType.SLOW,Integer.MAX_VALUE,20*60*5));
             Entity entity = le.getPassenger();
+            ((LivingEntity)entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW,50000,20*60*50));
             le.eject();
             leaveAll(entity,color);
         }
     }
+
     public Sheep getSheep(Entity entity){
         if(entity.getPassenger() != null){
             this.sheep = (Sheep)entity.getPassenger();

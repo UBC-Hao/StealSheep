@@ -1,15 +1,21 @@
 package com.github.takasab.Listener;
 
 import com.github.takasab.Game.GamePool;
+import com.github.takasab.Game.User;
 import org.bukkit.Material;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 /*
@@ -20,6 +26,17 @@ import org.bukkit.inventory.ItemStack;
  */
 public class ProtectListener implements Listener{
 /*Link start!*/
+    //玩家复活
+@EventHandler
+void onDied(EntityDamageByEntityEvent event){
+    if((event.getEntity() instanceof Player)){return;}
+    Player p = (Player) event.getEntity();
+    if(GamePool.getPlayerIn(p)!=null){
+        if(p.getHealth()-event.getDamage()<=0)
+        GamePool.getPlayerIn(p).died(p);
+    }
+}
+
     @EventHandler
     void onPlace(BlockPlaceEvent event){
         if(GamePool.getPlayerIn(event.getPlayer())!=null){
@@ -41,7 +58,44 @@ public class ProtectListener implements Listener{
     @EventHandler
     void onClick(InventoryClickEvent event){
         if(GamePool.getPlayerIn((Player)event.getWhoClicked())!=null){
+            event.setCancelled(true);
             event.getWhoClicked().closeInventory();
+            User user = new User((Player) event.getWhoClicked());
+            user.setColor(user.getColor());
+            ((Player) event.getWhoClicked()).updateInventory();
+        }
+    }
+     @EventHandler
+    void onDamage(EntityDamageByEntityEvent event){
+        if(event.getDamager() instanceof Player){
+        if(event.getEntity() instanceof Sheep){
+        if(GamePool.getPlayerIn((Player)event.getDamager())!=null){
+        event.setCancelled(true);
+        }
+        }
+        }
+    }
+    @EventHandler
+     void onPickUP(PlayerPickupItemEvent event){
+        if(GamePool.getPlayerIn(event.getPlayer()) !=null)
+            event.setCancelled(true);
+    }
+    @EventHandler
+    void onLeave(EntityDamageByEntityEvent event){
+        if(event.getEntity() instanceof  Player){
+            if(GamePool.getPlayerIn((Player)event.getEntity())!=null){
+                User user = new User((Player)event.getEntity());
+                if(event.getDamager() instanceof Player){
+                    User damager = new User((Player) event.getDamager());
+                    if(user.getColor().equals(damager.getColor())){
+                        event.setCancelled(
+                                true
+                        );
+                        return;
+                    }
+                }
+                user.leaveSheep();
+            }
         }
     }
     @EventHandler
@@ -54,4 +108,13 @@ public class ProtectListener implements Listener{
         }
     }
 
+   //职业选择
+    public void onChoose(PlayerInteractEvent event){
+        if(event.getClickedBlock().getType()==Material.SIGN){
+            Sign sign = (Sign)event.getClickedBlock().getState();
+            User user = new User(event.getPlayer());
+            if(sign.getLine(0).contains("[职业]"));
+            GamePool.getPlayerIn(event.getPlayer()).设置职业(event.getPlayer(),sign.getLine(1));
+        }
+    }
 }

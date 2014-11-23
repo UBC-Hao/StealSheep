@@ -2,6 +2,8 @@ package com.github.takasab.Game;
 
 import com.github.takasab.GameProcess.Request;
 import com.github.takasab.GameProcess.RequsetBus;
+import com.github.takasab.Main;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -15,9 +17,15 @@ import java.util.HashMap;
  */
 public class GamePool {
 /*Link start!*/
+    static Location lobby ;
+
     static ArrayList<Game> list = new ArrayList<Game>();
+    static HashMap<String,Game> map = new HashMap<String, Game>();
     static RequsetBus bus = new RequsetBus();
     static HashMap<Player,Integer> scores = new HashMap<Player, Integer>();
+    public static void setLobby(Location loc){
+        lobby=loc;
+    }
     public static void pushRequst(Request req){
         bus.pushRequst(req);
     }
@@ -27,9 +35,27 @@ public class GamePool {
         }
         return null;
     }
-    public static Game createGame(){
-       Game game = new Game();
-       list.add(game);
+    public static Game createGame(String name){
+       Location blue = Main.games.getLocation(name+".blue");
+       Location green = Main.games.getLocation(name+".green");
+       Location yellow = Main.games.getLocation(name+".yellow");
+       Location red = Main.games.getLocation(name+".red");
+       Location sheepspawn = Main.games.getLocation(name+".spawn");
+       Location lobby = Main.games.getLocation(name+".lobby");
+       Game game = new Game(name, Main.games.object().getInt(name+".min"),
+                                  Main.games.object().getInt(name+".max")
+       ,blue,green,yellow,red,sheepspawn,lobby);
+
+       if(list.contains(game)){
+           for(Game g:list){
+               if(g.equals(game)) {
+                   return g;
+               }
+           }
+       }else {
+           list.add(game);
+           map.put(name,game);
+       }
        return game;
     }
     public static void addPoint(Player p,int amount){
@@ -39,8 +65,17 @@ public class GamePool {
             scores.put(p,amount);
         }
     }
+    public static int getPoint(Player p){
+        return scores.get(p);
+    }
     public static void clearPlayerScores(Player player){
         scores.put(player,0);
     }
+    public static Game getGame(String room){
+        if(!map.containsKey(room)){
 
+            return null;
+        }
+        return map.get(room);
+    }
 }

@@ -1,5 +1,6 @@
 package com.github.takasab.Listener;
 
+import com.github.takasab.Game.ColorTool;
 import com.github.takasab.Game.GamePool;
 import com.github.takasab.Game.User;
 import org.bukkit.DyeColor;
@@ -31,14 +32,19 @@ public class CrraySheep implements Listener{
                     Sheep target = (Sheep) event.getRightClicked();
                     if(target.getColor()== DyeColor.BLACK){
                         target.getWorld().createExplosion(target.getLocation(),0);
-                        event.getPlayer().damage(5D);
+                        target.remove();
+                        user.leaveSheep();
+                        event.getPlayer().damage(1000D);
+                        
                         return;
                     }
-                    if(target.getColor()==DyeColor.getByColor(user.getColor())){
+                    if(ColorTool.getDyeToColorID(target.getColor())==
+                            ColorTool.getColorID(user.getColor())){
                         return;
                     }
 
                     System.out.print("add");
+                    if(user.getPassagerNum()>=3) return;
                     user.addSheep((Sheep)event.getRightClicked());
                     try {
                         ((LivingEntity) event.getRightClicked()).removePotionEffect(PotionEffectType.SLOW);

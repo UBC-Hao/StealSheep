@@ -15,6 +15,7 @@ import static org.bukkit.Color.*;
  (○´∀｀○)ﾉ
  */
 public class ColorTool {
+
     public static Color getColor(ItemStack item){
        if(item.getType()==Material.WOOL){
            short id = item.getDurability();
@@ -41,6 +42,20 @@ public class ColorTool {
         if(color .equals( GREEN)) return 5;
         if(color .equals( BLACK)) return 15;
         if(color .equals(RED)) return 14;
+        if(color.equals(Color.BLUE)) return 11;
+        return 0;
+    }
+    public static short getDyeToColorID(DyeColor color){
+        switch(color){
+            case BLACK:return 15;
+            case BLUE: return 11;
+            case BROWN: return 12;
+            case RED : return 14;
+            case YELLOW: return 4;
+            case PURPLE: return 2;
+            case WHITE: return 0;
+            case GREEN: return 5;
+        }
         return 0;
     }
     public static Color getByID(short id){
@@ -52,9 +67,11 @@ public class ColorTool {
                case 5: return Color.GREEN;
                case 15 : return Color.BLACK;
                case 14: return Color.RED;
+               case 11: return Color.BLUE;
            }
                return Color.WHITE;
     }
+    
     public static DyeColor toDyeColor(Color color){
         if(color .equals( WHITE )) return DyeColor.WHITE;
         if(color .equals( PURPLE )) return DyeColor.PURPLE;
@@ -63,6 +80,7 @@ public class ColorTool {
         if(color .equals( GREEN)) return DyeColor.GREEN;
         if(color .equals( BLACK)) return DyeColor.BLACK;
         if(color .equals(RED)) return DyeColor.RED;
+        if(color.equals(BLUE)) return DyeColor.BLUE;
         return DyeColor.WHITE;
     }
 }
