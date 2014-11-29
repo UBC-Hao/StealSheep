@@ -3,13 +3,10 @@ package com.github.takasab.Game;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
 
@@ -122,7 +119,7 @@ class Easycounter{
         if(le.getPassenger()!=null){
             ((Sheep)le.getPassenger()).setColor(ColorTool.toDyeColor(color));
             Entity entity = le.getPassenger();
-            ((LivingEntity)entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW,50000,20*60*50));
+            
             le.eject();
             leaveAll(entity,color);
         }

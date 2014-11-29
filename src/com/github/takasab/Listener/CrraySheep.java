@@ -1,6 +1,7 @@
 package com.github.takasab.Listener;
 
 import com.github.takasab.Game.ColorTool;
+import com.github.takasab.Game.Game;
 import com.github.takasab.Game.GamePool;
 import com.github.takasab.Game.User;
 import org.bukkit.DyeColor;
@@ -34,7 +35,8 @@ public class CrraySheep implements Listener{
                         target.getWorld().createExplosion(target.getLocation(),0);
                         target.remove();
                         user.leaveSheep();
-                        event.getPlayer().damage(1000D);
+                        Game game = GamePool.getPlayerIn(event.getPlayer());
+                        game.died(event.getPlayer());
                         
                         return;
                     }

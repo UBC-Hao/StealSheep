@@ -2,14 +2,16 @@ package com.github.takasab.Game;
 
 import com.github.takasab.GameProcess.Request;
 import com.github.takasab.GameProcess.StartThread;
+import com.github.takasab.Main;
 import com.github.takasab.Request.CarryRequst;
 import com.github.takasab.Setting.Setting;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
+import net.minecraft.server.v1_7_R1.EntityInsentient;
+import net.minecraft.server.v1_7_R1.Navigation;
+import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftLivingEntity;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -44,6 +46,51 @@ public class Game {
     { this.name=name;this.max=max;this.min=min;
     this.blue=blue;this.green=green;this.yellow=yellow;this.red=red;
         this.spawn=sheep; this.lobby = lobby;
+        
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
+        @Override
+        public void run(){
+           if(Game.this.start==false) return;
+           Sheep le =  (Sheep) Game.this.spawn.getWorld().spawnCreature(spawn, EntityType.SHEEP);
+           Random rand = new Random();
+           if(rand.nextInt(100)>80) le.setColor(DyeColor.BLACK);
+        }
+        }, 15*20, 15*20);
+        
+        //小羊回家
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
+            @Override
+            public void run() {
+                if (Game.this.start == false) {
+                    return;
+                }
+                System.out.print("小羊颜色检测0");
+                List<LivingEntity> l1 = spawn.getWorld().getLivingEntities();
+                LivingEntity le = null;
+                for (int i = 0; i < l1.size(); i++) {
+                    System.out.print("小羊颜色检测1");
+                    le = l1.get(i);
+                    if (le instanceof Sheep) {
+                        Sheep sheep = (Sheep) le;
+                        if (sheep.getColor().equals(DyeColor.WHITE)) {
+                            continue;
+                        }
+                        System.out.print("小羊颜色检测2");
+                        if (Game.this.getTeamSpawn(ColorTool.getByID(ColorTool.getDyeToColorID(sheep.getColor()))
+                        ) == null) {
+                            continue;
+                        }
+                        Location loc = Game.this.getTeamSpawn(ColorTool.getByID(ColorTool.getDyeToColorID(sheep.getColor())));
+                        CraftLivingEntity l = (CraftLivingEntity) le;
+                        EntityInsentient en = (EntityInsentient) l.getHandle();
+                        Navigation na = en.getNavigation();
+                        na.a(loc.getX(), loc.getY(), loc.getZ(), 0.9);
+                        System.out.print("小羊回家监听器" + loc.getBlockX() + loc.getBlockZ());
+                    }
+
+                }
+            }
+        }, 10, 10);
     }
     public void 设置职业(Player p,String 职业){
         job.put(p,职业);
@@ -90,6 +137,13 @@ public class Game {
             p.teleport(this.getTeamSpawn(user.getColor()));
             if(!job.containsKey(p)){
                 p.getInventory().setItem(0, new ItemStack(Material.WOOD_SWORD));
+                     ItemStack saddle = new  ItemStack(Material.SADDLE);
+            ItemMeta me = saddle.getItemMeta();
+            me.setDisplayName(ChatColor.RED+"神奇的马鞍");
+            saddle.setItemMeta(me);
+            p.getInventory().setItem(1, saddle);
+            p.updateInventory();
+                continue;
             }
             String 职业 = job.get(p);
             if (职业.equalsIgnoreCase("berserker"))
@@ -100,6 +154,14 @@ public class Game {
             }
             if (职业.equalsIgnoreCase("saber"))
                 p.getInventory().setItem(0, new ItemStack(Material.WOOD_SWORD));
+            
+            ItemStack saddle = new  ItemStack(Material.SADDLE);
+            ItemMeta me = saddle.getItemMeta();
+            me.setDisplayName(ChatColor.RED+"神奇的马鞍");
+            saddle.setItemMeta(me);
+            p.getInventory().setItem(1, saddle);
+            p.updateInventory();
+            
         }
         //结束线程
         new  Thread(){
@@ -112,6 +174,11 @@ public class Game {
                 this.stop();
             }
         }.start();
+        //小羊集合线程
+
+        //小羊生成线程
+
+
     }
     public void broadcast(String str){
         for(Player p:players)
@@ -162,6 +229,11 @@ public class Game {
         //正在写
     }
     public void stop(){
+        for (Entity entity :this.spawn.getWorld().getLivingEntities()){
+          if(entity instanceof Sheep){
+          entity.remove();
+          }
+        }
         for(Player p:getPlayers()){
             left(p);
             p.sendMessage(ChatColor.BLUE+"========"+ChatColor.RED+"游戏结束"+ChatColor.BLUE+"========");
@@ -170,6 +242,7 @@ public class Game {
             p.sendMessage("蓝队得分:"+this.getTeamScore(Color.BLUE)+"绿队得分:"+getTeamScore(Color.GREEN));
             p.sendMessage("黄队得分:"+this.getTeamScore(Color.YELLOW)+"红队得分:"+getTeamScore(Color.RED));
         }
+      
         players.clear();
         start = false;
         iswait = true;

@@ -22,11 +22,11 @@ public class ColorTool {
            switch (id){
                case 0: return Color.WHITE;
                case 2: return Color.PURPLE;
-               case 3: return Color.AQUA;
-               case 4: return Color.YELLOW;
-               case 5: return Color.GREEN;
+               case 11: return Color.BLUE;//
+               case 4: return Color.YELLOW;//
+               case 5: return Color.GREEN;//
                case 15 : return Color.BLACK;
-               case 14: return Color.RED;
+               case 14: return Color.RED;//
            }
        }else if(item.getType()==Material.LEATHER){
            LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
@@ -37,12 +37,12 @@ public class ColorTool {
     public static short getColorID(final Color color){
         if(color .equals( WHITE )) return 0;
         if(color .equals( PURPLE )) return 2;
-        if(color .equals( AQUA)) return 3;
+        if(color .equals( BLUE)) return 11;
         if(color .equals( YELLOW)) return 4;
         if(color .equals( GREEN)) return 5;
         if(color .equals( BLACK)) return 15;
         if(color .equals(RED)) return 14;
-        if(color.equals(Color.BLUE)) return 11;
+        if(color.equals(BLUE)) return 11;
         return 0;
     }
     public static short getDyeToColorID(DyeColor color){
