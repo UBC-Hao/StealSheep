@@ -17,6 +17,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.*;
 
@@ -64,7 +68,48 @@ public class Game {
            if(rand.nextInt(100)>80) le.setColor(DyeColor.BLACK);
         }
         }, 15*20, 15*20);
-        
+        //玩家计分板刷新
+        new Thread(){
+            @Override
+            public void run(){
+                while(true){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if(Game.this.start){
+
+                        for (Player p : players)
+                        {
+
+
+                            Objective Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+
+                            Scoreboard localScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+                            Obj = localScoreboard.registerNewObjective("swalk", "haha");
+                            Obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+                            Obj.setDisplayName("§a§l偷羊羊小游戏");
+                            p.setScoreboard(localScoreboard);
+
+
+                            Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+                            Score s = Obj.getScore(Bukkit.getOfflinePlayer("§6玩家人数"));
+                            Score l = Obj.getScore(Bukkit.getOfflinePlayer("§6蓝队"));
+                            Score r = Obj.getScore(Bukkit.getOfflinePlayer("§6红队"));
+                            Score g = Obj.getScore(Bukkit.getOfflinePlayer("§6绿队"));
+                            Score y = Obj.getScore(Bukkit.getOfflinePlayer("§6黄队"));
+                            s.setScore(players.size());
+                            l.setScore(Game.this.getTeamScore(Color.BLUE));
+                            r.setScore(Game.this.getTeamScore(Color.RED));
+                            g.setScore(Game.this.getTeamScore(Color.GREEN));
+                            y.setScore(Game.this.getTeamScore(Color.YELLOW));
+                        }
+
+                    }
+                }
+            }
+        }.start();
         //小羊回家
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
             @Override
@@ -143,6 +188,7 @@ public class Game {
     }
 
     public int getTeamScore(Color c){
+        if(!map.containsKey(c)) return 0;
         return map.get(c);
     }
     public void addTeamScore(Color color,int amount){
