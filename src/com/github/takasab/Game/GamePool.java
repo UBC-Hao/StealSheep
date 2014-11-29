@@ -42,9 +42,15 @@ public class GamePool {
        Location red = Main.games.getLocation(name+".red");
        Location sheepspawn = Main.games.getLocation(name+".spawn");
        Location lobby = Main.games.getLocation(name+".lobby");
+
+        Location sheepblue = Main.games.getLocation(name+".sheepblue");
+        Location sheepgreen = Main.games.getLocation(name+".sheepgreen");
+        Location sheepyellow = Main.games.getLocation(name+".sheepyellow");
+        Location sheepred = Main.games.getLocation(name+".sheepred");
        Game game = new Game(name, Main.games.object().getInt(name+".min"),
                                   Main.games.object().getInt(name+".max")
-       ,blue,green,yellow,red,sheepspawn,lobby);
+       ,blue,green,yellow,red,sheepspawn,lobby,
+        sheepblue,sheepgreen,sheepred,sheepyellow );
 
        if(list.contains(game)){
            for(Game g:list){
@@ -64,6 +70,8 @@ public class GamePool {
         }else{
             scores.put(p,amount);
         }
+        Main.players.object().set(p.getName(),scores.get(p));
+        Main.players.save();
     }
     public static int getPoint(Player p){
         return scores.get(p);

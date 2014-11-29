@@ -1,6 +1,7 @@
 package com.github.takasab.Listener;
 
 import com.github.takasab.Game.ColorTool;
+import com.github.takasab.Game.GamePool;
 import com.github.takasab.Game.User;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -21,6 +22,7 @@ public class PlaceEvent implements Listener{
         Player p = event.getPlayer();
         if(p.getPassenger()==null) return;
         User user = new User(p);
+        if(GamePool.getPlayerIn(p)==null) return;
         System.out.print("listen");
         System.out.print(p.getLocation().getBlock().getRelative(0, -1, 0).getData());
         System.out.print(ColorTool.getColorID(user.getColor()));
@@ -28,6 +30,7 @@ public class PlaceEvent implements Listener{
         if(p.getPassenger().getType() == EntityType.SHEEP){
             System.out.print("drop");
             user.leaveWithColor();
+            GamePool.getPlayerIn(p).addTeamScore(user.getColor(),user.getPassagerNum());
         }
         }
      }

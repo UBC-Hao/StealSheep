@@ -2,6 +2,7 @@ package com.github.takasab.Listener;
 
 import com.github.takasab.Game.GamePool;
 import com.github.takasab.Game.User;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Arrow;
@@ -35,8 +36,16 @@ void onDied(EntityDamageByEntityEvent event){
     if(!(event.getEntity() instanceof Player)){return;}
     Player p = (Player) event.getEntity();
     if(GamePool.getPlayerIn(p)!=null){
-        if(p.getHealth()-event.getDamage()<=0)
-        GamePool.getPlayerIn(p).died(p);
+        if(p.getHealth()-event.getDamage()<=0){
+          GamePool.getPlayerIn(p).died(p);
+          if(event.getDamager() instanceof Player) {
+              GamePool.getPlayerIn(p).broadcast(ChatColor.RED+"玩家 " + p.getName() + " 被 "+((Player) event.getDamager()).getName()+" 杀死");
+              Player killer = (Player) event.getDamager();
+              killer.sendMessage("你成功杀死玩家 "+p.getName()+" 获得 1 积分");
+              User user = new User(killer);
+              user.addScore(1);
+          }
+        }
     }
 }
 
@@ -73,7 +82,8 @@ void onDied(EntityDamageByEntityEvent event){
         if(event.getDamager() instanceof Player){
         if(event.getEntity() instanceof Sheep){
         if(GamePool.getPlayerIn((Player)event.getDamager())!=null){
-        event.setCancelled(true);
+          event.setCancelled(true);
+
         }
         }
         }

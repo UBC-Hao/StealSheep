@@ -9,7 +9,10 @@ import net.minecraft.server.v1_7_R1.EntityInsentient;
 import net.minecraft.server.v1_7_R1.Navigation;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftLivingEntity;
-import org.bukkit.entity.*;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -36,17 +39,22 @@ public class Game {
     Location red;
     Location spawn;
     Location lobby;
+
+    Location sheepblue;
+    Location sheepgreen;
+    Location sheepyellow;
+    Location sheepred;
     HashMap<Color,Integer> map = new HashMap<Color, Integer>();
     List<Player> players = new ArrayList<Player>();
     HashMap<Player,String> job = new HashMap<Player, String>();
 
     Game(String name,int min,int max,
     Location blue,Location green,Location yellow,Location red,Location sheep
-    ,Location lobby)
+    ,Location lobby,Location sheepblue,Location sheepgreen,Location sheepred,Location sheepyellow)
     { this.name=name;this.max=max;this.min=min;
     this.blue=blue;this.green=green;this.yellow=yellow;this.red=red;
         this.spawn=sheep; this.lobby = lobby;
-        
+    this.sheepgreen=sheepblue;this.sheepgreen=sheepgreen;this.sheepyellow=sheepyellow;this.sheepred=sheepred;
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
         @Override
         public void run(){
@@ -80,7 +88,7 @@ public class Game {
                         ) == null) {
                             continue;
                         }
-                        Location loc = Game.this.getTeamSpawn(ColorTool.getByID(ColorTool.getDyeToColorID(sheep.getColor())));
+                        Location loc = Game.this.getSheepSpawn(ColorTool.getByID(ColorTool.getDyeToColorID(sheep.getColor())));
                         CraftLivingEntity l = (CraftLivingEntity) le;
                         EntityInsentient en = (EntityInsentient) l.getHandle();
                         Navigation na = en.getNavigation();
@@ -91,6 +99,25 @@ public class Game {
                 }
             }
         }, 10, 10);
+
+        //小羊清理
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
+            @Override
+            public void run() {
+                if (Game.this.start) {
+                    return;
+                }
+                System.out.print("小羊清理");
+                List<LivingEntity> l1 = spawn.getWorld().getLivingEntities();
+                LivingEntity le = null;
+                for (int i = 0; i < l1.size(); i++) {
+                    le = l1.get(i);
+                    if (le instanceof Sheep) {
+                        le.remove();
+                    }
+                }
+            }
+        }, 200, 200);
     }
     public void 设置职业(Player p,String 职业){
         job.put(p,职业);
@@ -106,6 +133,15 @@ public class Game {
         if(c.equals(Color.GREEN)) return green;
         return null;
     }
+
+    public Location getSheepSpawn(Color c){
+        if(c.equals(Color.BLUE)) return sheepblue;
+        if(c.equals(Color.RED)) return sheepred;
+        if(c.equals(Color.YELLOW)) return sheepyellow;
+        if(c.equals(Color.GREEN)) return sheepgreen;
+        return null;
+    }
+
     public int getTeamScore(Color c){
         return map.get(c);
     }
@@ -170,8 +206,21 @@ public class Game {
                     sleep(Setting.WAITTIME* 1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                }{
+                    Game.this.broadcast("游戏结束");
+
+                    for(Player p:getPlayers()){
+
+                        p.sendMessage(ChatColor.BLUE+"========"+ChatColor.RED+"游戏结束"+ChatColor.BLUE+"========");
+                        p.sendMessage(ChatColor.BLUE+"本次获得奖励:"+ChatColor.GREEN+(new User(p)).getScore());
+                        p.sendMessage(ChatColor.BLUE+"本队得分:"+ChatColor.RED+getTeamScore(new User(p).getColor()));
+                        p.sendMessage("蓝队得分:"+Game.this.getTeamScore(Color.BLUE)+"绿队得分:"+getTeamScore(Color.GREEN));
+                        p.sendMessage("黄队得分:"+Game.this.getTeamScore(Color.YELLOW)+"红队得分:"+getTeamScore(Color.RED));
+                    }
+
+
+                    Game.this.stop();
                 }
-                this.stop();
             }
         }.start();
         //小羊集合线程
@@ -193,6 +242,7 @@ public class Game {
                 player.sendMessage(ChatColor.AQUA+"人满为患,请换其他房间");
                 return;
             }
+            player.getInventory().clear();
             players.add(player);
             //开始监听玩家手上的物品 如果不为马鞍的时候 移除小羊
             for(Player p:players){
@@ -226,21 +276,12 @@ public class Game {
     public void left(Player player){
         players.remove(player);
         player.teleport(GamePool.lobby);
+        player.getInventory().clear();
         //正在写
     }
     public void stop(){
-        for (Entity entity :this.spawn.getWorld().getLivingEntities()){
-          if(entity instanceof Sheep){
-          entity.remove();
-          }
-        }
         for(Player p:getPlayers()){
             left(p);
-            p.sendMessage(ChatColor.BLUE+"========"+ChatColor.RED+"游戏结束"+ChatColor.BLUE+"========");
-            p.sendMessage(ChatColor.BLUE+"本次获得奖励:"+ChatColor.GREEN+(new User(p)).getScore());
-            p.sendMessage(ChatColor.BLUE+"本队得分:"+ChatColor.RED+getTeamScore(new User(p).getColor()));
-            p.sendMessage("蓝队得分:"+this.getTeamScore(Color.BLUE)+"绿队得分:"+getTeamScore(Color.GREEN));
-            p.sendMessage("黄队得分:"+this.getTeamScore(Color.YELLOW)+"红队得分:"+getTeamScore(Color.RED));
         }
       
         players.clear();
