@@ -79,7 +79,6 @@ public class Game {
 
                     for (Player p : players) {
 
-
                         Objective Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
 
                         Scoreboard localScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();

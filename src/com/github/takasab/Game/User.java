@@ -112,6 +112,7 @@ class Easycounter{
         if(le.getPassenger()!=null){
             Entity passager = le.getPassenger();
             le.eject();
+            passager.teleport(le.getLocation().add(0,1,0));
             leaveAll(passager);
         }
     }
@@ -119,7 +120,7 @@ class Easycounter{
         if(le.getPassenger()!=null){
             ((Sheep)le.getPassenger()).setColor(ColorTool.toDyeColor(color));
             Entity entity = le.getPassenger();
-            
+            entity.teleport(le.getLocation().add(0,1,0));
             le.eject();
             leaveAll(entity,color);
         }

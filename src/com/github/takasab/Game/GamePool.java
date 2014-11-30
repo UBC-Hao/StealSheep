@@ -17,7 +17,7 @@ import java.util.HashMap;
  */
 public class GamePool {
 /*Link start!*/
-    static Location lobby ;
+    public static Location lobby ;
 
     static ArrayList<Game> list = new ArrayList<Game>();
     static HashMap<String,Game> map = new HashMap<String, Game>();

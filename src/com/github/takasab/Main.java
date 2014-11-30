@@ -35,6 +35,7 @@ public class Main extends JavaPlugin{
        for(String str:games.object().getKeys(false)){
           GamePool.createGame(str);
        }
+       GamePool.setLobby(config.getLocation("lobby"));
        //自动恢复玩家饥饿
        new Thread(){
            public void run(){
