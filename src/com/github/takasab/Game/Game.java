@@ -71,7 +71,22 @@ public class Game {
            if(rand.nextInt(100)>80) le.setColor(DyeColor.BLACK);
         }
         }, 15*20, 15*20);
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable() {
+                    @Override
+                    public void run() {
+                        if (Game.this.start) {
+                           for(LivingEntity le : spawn.getWorld().getLivingEntities()){
+                               if(le instanceof Sheep){
+                                   if(!le.isOnGround()){
+                                       le.remove();
+                                   }
+                               }
+                           }
+                        }
+                    }
+                }, 20, 20);
         //玩家计分板刷新
+
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable() {
             @Override
             public void run() {
@@ -105,7 +120,7 @@ public class Game {
 
                 }
             }
-        }, 1000, 1000);
+        }, 20, 20);
         //小羊回家
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
             @Override
