@@ -5,7 +5,6 @@ import com.github.takasab.Game.User;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
 import org.bukkit.event.EventHandler;
@@ -17,9 +16,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 
 /*
@@ -30,6 +27,18 @@ import org.bukkit.inventory.ItemStack;
  */
 public class ProtectListener implements Listener{
 /*Link start!*/
+
+    @EventHandler
+    void onLogin(PlayerJoinEvent event){
+        event.getPlayer().getInventory().clear();
+        event.getPlayer().teleport(GamePool.lobby);
+    }
+    @EventHandler
+    void onLeave(PlayerQuitEvent event){
+        if(GamePool.getPlayerIn(event.getPlayer())==null) return;
+        GamePool.getPlayerIn(event.getPlayer()).left(event.getPlayer());
+    }
+
     //玩家复活
 @EventHandler
 void onDied(EntityDamageByEntityEvent event){
@@ -48,7 +57,11 @@ void onDied(EntityDamageByEntityEvent event){
         }
     }
 }
-
+@EventHandler
+void onSheep(EntityDamageByEntityEvent event){
+if(event.getEntity() instanceof Sheep)
+    event.setCancelled(true);
+}
     @EventHandler
     void onPlace(BlockPlaceEvent event){
         if(GamePool.getPlayerIn(event.getPlayer())!=null){
@@ -95,20 +108,20 @@ void onDied(EntityDamageByEntityEvent event){
     }
     @EventHandler
     void onLeave(EntityDamageByEntityEvent event){
-        if(event.getDamager() instanceof Arrow) return;
+        
         if(event.getEntity() instanceof  Player){
-            if(!(event.getDamager() instanceof Player)) return;
+           
             
             if(!(event.getEntity() instanceof Player)) return;
             
             
             if(GamePool.getPlayerIn((Player)event.getEntity())!=null){
                 User user = new User((Player)event.getEntity());
-                if(GamePool.getPlayerIn((Player)event.getDamager())==null)return;
                 if(GamePool.getPlayerIn((Player)event.getEntity())==null)return;
                 if(event.getDamager() instanceof Player){
-                    
                     User damager = new User((Player) event.getDamager());
+                    if((user.getColor()==null)&&(damager.getColor()==null))
+                        return;
                     if(user.getColor().equals(damager.getColor())){
                         event.setCancelled(
                                 true
