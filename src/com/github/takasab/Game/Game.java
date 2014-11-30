@@ -36,6 +36,9 @@ public class Game {
     String name;
     int max;
     int min;
+
+    int gametick=0;
+
     boolean iswait = true;
     Location blue;
     Location green;
@@ -69,47 +72,41 @@ public class Game {
         }
         }, 15*20, 15*20);
         //玩家计分板刷新
-        new Thread(){
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable() {
             @Override
-            public void run(){
-                while(true){
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            public void run() {
+                if (Game.this.start) {
+
+                    for (Player p : players) {
+
+
+                        Objective Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+
+                        Scoreboard localScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+                        Obj = localScoreboard.registerNewObjective("swalk", "haha");
+                        Obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+                        Obj.setDisplayName("§a§l偷羊羊小游戏");
+                        p.setScoreboard(localScoreboard);
+
+
+                        Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+                        Score s = Obj.getScore(Bukkit.getOfflinePlayer("§6玩家人数"));
+                        Score l = Obj.getScore(Bukkit.getOfflinePlayer("§6蓝队"));
+                        Score r = Obj.getScore(Bukkit.getOfflinePlayer("§6红队"));
+                        Score g = Obj.getScore(Bukkit.getOfflinePlayer("§6绿队"));
+                        Score y = Obj.getScore(Bukkit.getOfflinePlayer("§6黄队"));
+                        Score w = Obj.getScore(Bukkit.getOfflinePlayer("§6剩余时间"));
+                        s.setScore(players.size());
+                        l.setScore(Game.this.getTeamScore(Color.BLUE));
+                        r.setScore(Game.this.getTeamScore(Color.RED));
+                        g.setScore(Game.this.getTeamScore(Color.GREEN));
+                        y.setScore(Game.this.getTeamScore(Color.YELLOW));
+                        w.setScore(Game.this.gametick);
                     }
-                    if(Game.this.start){
 
-                        for (Player p : players)
-                        {
-
-
-                            Objective Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
-
-                            Scoreboard localScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-                            Obj = localScoreboard.registerNewObjective("swalk", "haha");
-                            Obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-                            Obj.setDisplayName("§a§l偷羊羊小游戏");
-                            p.setScoreboard(localScoreboard);
-
-
-                            Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
-                            Score s = Obj.getScore(Bukkit.getOfflinePlayer("§6玩家人数"));
-                            Score l = Obj.getScore(Bukkit.getOfflinePlayer("§6蓝队"));
-                            Score r = Obj.getScore(Bukkit.getOfflinePlayer("§6红队"));
-                            Score g = Obj.getScore(Bukkit.getOfflinePlayer("§6绿队"));
-                            Score y = Obj.getScore(Bukkit.getOfflinePlayer("§6黄队"));
-                            s.setScore(players.size());
-                            l.setScore(Game.this.getTeamScore(Color.BLUE));
-                            r.setScore(Game.this.getTeamScore(Color.RED));
-                            g.setScore(Game.this.getTeamScore(Color.GREEN));
-                            y.setScore(Game.this.getTeamScore(Color.YELLOW));
-                        }
-
-                    }
                 }
             }
-        }.start();
+        }, 1000, 1000);
         //小羊回家
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
             @Override
@@ -129,7 +126,7 @@ public class Game {
                             continue;
                         }
                         System.out.print("小羊颜色检测2");
-                        if (Game.this.getTeamSpawn(ColorTool.getByID(ColorTool.getDyeToColorID(sheep.getColor()))
+                        if (Game.this.getSheepSpawn(ColorTool.getByID(ColorTool.getDyeToColorID(sheep.getColor()))
                         ) == null) {
                             continue;
                         }
@@ -137,7 +134,13 @@ public class Game {
                         CraftLivingEntity l = (CraftLivingEntity) le;
                         EntityInsentient en = (EntityInsentient) l.getHandle();
                         Navigation na = en.getNavigation();
+                        try{
                         na.a(loc.getX(), loc.getY(), loc.getZ(), 0.9);
+                        }catch(Exception e){
+                            e.printStackTrace();
+                            System.out.print(na);
+                            System.out.print(loc);
+                        }
                         System.out.print("小羊回家监听器" + loc.getBlockX() + loc.getBlockZ());
                     }
 
@@ -152,7 +155,7 @@ public class Game {
                 if (Game.this.start) {
                     return;
                 }
-                System.out.print("小羊清理");
+                System.out.print("小羊清理:"+Game.this.start);
                 List<LivingEntity> l1 = spawn.getWorld().getLivingEntities();
                 LivingEntity le = null;
                 for (int i = 0; i < l1.size(); i++) {
@@ -245,6 +248,26 @@ public class Game {
             p.updateInventory();
             
         }
+
+        new Thread(){
+            public void run(){
+                gametick=Setting.WAITTIME;
+                while(true){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if(gametick>0){
+                        gametick--;
+                    }else{
+                        break;
+                    }
+                }
+            }
+
+        }.start();
+
         //结束线程
         new  Thread(){
             public void run(){
@@ -252,21 +275,24 @@ public class Game {
                     sleep(Setting.WAITTIME* 1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }{
+                }
                     Game.this.broadcast("游戏结束");
 
-                    for(Player p:getPlayers()){
-
-                        p.sendMessage(ChatColor.BLUE+"========"+ChatColor.RED+"游戏结束"+ChatColor.BLUE+"========");
-                        p.sendMessage(ChatColor.BLUE+"本次获得奖励:"+ChatColor.GREEN+(new User(p)).getScore());
-                        p.sendMessage(ChatColor.BLUE+"本队得分:"+ChatColor.RED+getTeamScore(new User(p).getColor()));
-                        p.sendMessage("蓝队得分:"+Game.this.getTeamScore(Color.BLUE)+"绿队得分:"+getTeamScore(Color.GREEN));
-                        p.sendMessage("黄队得分:"+Game.this.getTeamScore(Color.YELLOW)+"红队得分:"+getTeamScore(Color.RED));
-                    }
-
-
-                    Game.this.stop();
+                start = false;
+                iswait = true;
+                for (Player p : getPlayers()) {
+                    if(!p.isOnline()) continue;
+                    left(p);
                 }
+                for (Player p : getPlayers()) {
+                    if(!p.isOnline()) continue;
+                    p.sendMessage(ChatColor.BLUE + "========" + ChatColor.RED + "游戏结束" + ChatColor.BLUE + "========");
+                    p.sendMessage(ChatColor.BLUE + "本次获得奖励:" + ChatColor.GREEN + (new User(p)).getScore());
+                    p.sendMessage(ChatColor.BLUE + "本队得分:" + ChatColor.RED + getTeamScore(new User(p).getColor()));
+                    p.sendMessage("蓝队得分:" + Game.this.getTeamScore(Color.BLUE) + "绿队得分:" + getTeamScore(Color.GREEN));
+                    p.sendMessage("黄队得分:" + Game.this.getTeamScore(Color.YELLOW) + "红队得分:" + getTeamScore(Color.RED));
+                }
+                players.clear();
             }
         }.start();
         //小羊集合线程
@@ -320,20 +346,15 @@ public class Game {
         return players;
     }
     public void left(Player player){
+        if(players.contains(player))
         players.remove(player);
-        player.teleport(GamePool.lobby);
-        player.getInventory().clear();
+        if(player.isOnline()) {
+            player.teleport(GamePool.lobby);
+            player.getInventory().clear();
+        }
         //正在写
     }
-    public void stop(){
-        for(Player p:getPlayers()){
-            left(p);
-        }
-      
-        players.clear();
-        start = false;
-        iswait = true;
-    }
+
     @Override
     public boolean equals(Object obj){
         if(obj instanceof Game){
