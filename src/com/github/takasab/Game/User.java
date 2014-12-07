@@ -69,7 +69,6 @@ public class User {
         player.updateInventory();
 
         Easycounter c = new Easycounter();
-        if(getPassagerNum()>=3) return;
         if(c.getSheep(player) == null){
             player.setPassenger(sheep);
         }else{
