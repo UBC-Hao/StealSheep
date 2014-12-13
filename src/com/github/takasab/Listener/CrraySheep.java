@@ -5,6 +5,7 @@ import com.github.takasab.Game.Game;
 import com.github.takasab.Game.GamePool;
 import com.github.takasab.Game.User;
 import org.bukkit.DyeColor;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Sheep;
 import org.bukkit.event.EventHandler;
@@ -31,6 +32,8 @@ public class CrraySheep implements Listener{
             if(user.isHandItem("神奇的马鞍")){
                 if(event.getRightClicked() instanceof Sheep) {
                     Sheep target = (Sheep) event.getRightClicked();
+                    CraftLivingEntity cl = (CraftLivingEntity) target;
+                    if(cl.getHandle().vehicle!=null) return;
                     if(target.getColor()== DyeColor.BLACK){
                         target.getWorld().createExplosion(target.getLocation(),0);
                         target.remove();

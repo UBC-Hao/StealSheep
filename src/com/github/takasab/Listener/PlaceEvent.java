@@ -29,7 +29,7 @@ public class PlaceEvent implements Listener{
         if(p.getLocation().getBlock().getRelative(0, -1, 0).getData()==(ColorTool.getColorID(user.getColor()))){
         if(p.getPassenger().getType() == EntityType.SHEEP){
             System.out.print("drop");
-             GamePool.getPlayerIn(p).addTeamScore(user.getColor(),user.getPassagerNum());
+            GamePool.getPlayerIn(p).addTeamScore(user.getColor(),user.getPassagerNum());
             user.leaveWithColor();
            
         }

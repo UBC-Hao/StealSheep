@@ -1,6 +1,7 @@
 package com.github.takasab.Game;
 
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -84,7 +85,7 @@ public class User {
     public synchronized void leaveWithColor(){
        System.out.print("leave with color");
        Easycounter c = new Easycounter();
-       c.leaveAll(player,getColor());
+       c.leaveAll(player,getColor(),GamePool.getPlayerIn(player).getSheepSpawn(this.getColor()));
        clearWool();
        this.addScore(this.getPassagerNum());
     }
@@ -111,17 +112,17 @@ class Easycounter{
         if(le.getPassenger()!=null){
             Entity passager = le.getPassenger();
             le.eject();
-            passager.teleport(le.getLocation().add(0,1,0));
+            passager.teleport(le.getLocation().add(0.5,1,0.5));
             leaveAll(passager);
         }
     }
-    public void leaveAll(Entity le,Color color){
+    public void leaveAll(Entity le,Color color,Location loc){
         if(le.getPassenger()!=null){
             ((Sheep)le.getPassenger()).setColor(ColorTool.toDyeColor(color));
             Entity entity = le.getPassenger();
-            entity.teleport(le.getLocation().add(0,1,0));
+            entity.teleport(loc);
             le.eject();
-            leaveAll(entity,color);
+            leaveAll(entity,color,loc);
         }
     }
 

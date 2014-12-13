@@ -42,7 +42,6 @@ public class ColorTool {
         if(color .equals( GREEN)) return 5;
         if(color .equals( BLACK)) return 15;
         if(color .equals(RED)) return 14;
-        if(color.equals(BLUE)) return 11;
         return 0;
     }
     public static short getDyeToColorID(DyeColor color){

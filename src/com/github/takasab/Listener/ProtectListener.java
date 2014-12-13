@@ -11,10 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
@@ -120,6 +117,34 @@ if(event.getEntity() instanceof Sheep)
                 if(GamePool.getPlayerIn((Player)event.getEntity())==null)return;
                 if(event.getDamager() instanceof Player){
                     User damager = new User((Player) event.getDamager());
+                    if((user.getColor()==null)||(damager.getColor()==null))
+                        return;
+                    if(user.getColor().equals(damager.getColor())){
+                        event.setCancelled(
+                                true
+                        );
+                        return;
+                    }
+                }
+                user.leaveSheep();
+            }
+        }
+    }
+
+    @EventHandler
+    void onLeaveFall(EntityDamageByBlockEvent event){
+
+        if(event.getEntity() instanceof  Player){
+
+
+            if(!(event.getEntity() instanceof Player)) return;
+
+
+            if(GamePool.getPlayerIn((Player)event.getEntity())!=null){
+                User user = new User((Player)event.getEntity());
+                if(GamePool.getPlayerIn((Player)event.getEntity())==null)return;
+                if(event.getDamager() instanceof Player){
+                    User damager = new User((Player) event.getDamager());
                     if((user.getColor()==null)&&(damager.getColor()==null))
                         return;
                     if(user.getColor().equals(damager.getColor())){
@@ -133,6 +158,8 @@ if(event.getEntity() instanceof Sheep)
             }
         }
     }
+
+
     @EventHandler
     void onShoot(EntityShootBowEvent event){
         if(event.getEntity() instanceof  Player){

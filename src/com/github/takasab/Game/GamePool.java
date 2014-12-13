@@ -74,7 +74,12 @@ public class GamePool {
         Main.players.save();
     }
     public static int getPoint(Player p){
+        if(scores.containsKey(p))
         return scores.get(p);
+        else
+        {
+            return Main.players.object().getInt(p.getName());
+        }
     }
     public static void clearPlayerScores(Player player){
         scores.put(player,0);

@@ -1,4 +1,4 @@
-package com.github.takasab.Game;
+﻿package com.github.takasab.Game;
 
 import com.github.takasab.GameProcess.Request;
 import com.github.takasab.GameProcess.StartThread;
@@ -61,7 +61,7 @@ public class Game {
     { this.name=name;this.max=max;this.min=min;
     this.blue=blue;this.green=green;this.yellow=yellow;this.red=red;
         this.spawn=sheep; this.lobby = lobby;
-    this.sheepgreen=sheepblue;this.sheepgreen=sheepgreen;this.sheepyellow=sheepyellow;this.sheepred=sheepred;
+    this.sheepblue=sheepblue;this.sheepgreen=sheepgreen;this.sheepyellow=sheepyellow;this.sheepred=sheepred;
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
         @Override
         public void run(){
@@ -70,22 +70,34 @@ public class Game {
            Random rand = new Random();
            if(rand.nextInt(100)>80) le.setColor(DyeColor.BLACK);
         }
-        }, 15*20, 15*20);
+        }, 20*20, 20*20);
+        /*
+
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable() {
                     @Override
                     public void run() {
                         if (Game.this.start) {
                            for(LivingEntity le : spawn.getWorld().getLivingEntities()){
                                if(le instanceof Sheep){
-                                   if(!le.isOnGround()){
-                                       le.remove();
+                                   if(!le.isOnGround()) {
+                                       try {
+                                           Thread.sleep(3000);
+                                       } catch (InterruptedException e) {
+                                           e.printStackTrace();
+                                       }
+                                       if(!le.isOnGround()){
+                                           le.remove();
+                                       }
                                    }
+
                                }
                            }
                         }
                     }
                 }, 20, 20);
+                */
         //玩家计分板刷新
+                
 
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable() {
             @Override
@@ -105,12 +117,14 @@ public class Game {
 
                         Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
                         Score s = Obj.getScore(Bukkit.getOfflinePlayer("§6玩家人数"));
+                        Score me = Obj.getScore(Bukkit.getOfflinePlayer("我的积分"));
                         Score l = Obj.getScore(Bukkit.getOfflinePlayer("§6蓝队"));
                         Score r = Obj.getScore(Bukkit.getOfflinePlayer("§6红队"));
                         Score g = Obj.getScore(Bukkit.getOfflinePlayer("§6绿队"));
                         Score y = Obj.getScore(Bukkit.getOfflinePlayer("§6黄队"));
                         Score w = Obj.getScore(Bukkit.getOfflinePlayer("§6剩余时间"));
                         s.setScore(players.size());
+                        me.setScore(new User(p).getScore());
                         l.setScore(Game.this.getTeamScore(Color.BLUE));
                         r.setScore(Game.this.getTeamScore(Color.RED));
                         g.setScore(Game.this.getTeamScore(Color.GREEN));
@@ -139,6 +153,9 @@ public class Game {
                         if (sheep.getColor().equals(DyeColor.WHITE)) {
                             continue;
                         }
+              
+                        
+                        
                         System.out.print("小羊颜色检测2");
                         if (Game.this.getSheepSpawn(ColorTool.getByID(ColorTool.getDyeToColorID(sheep.getColor()))
                         ) == null) {
@@ -208,8 +225,14 @@ public class Game {
         if(!map.containsKey(c)) return 0;
         return map.get(c);
     }
+    public void clearTeamScore(){
+        map.put(Color.BLUE, 0);
+        map.put(Color.RED, 0);
+        map.put(Color.YELLOW, 0);
+        map.put(Color.GREEN,0);
+    }
     public void addTeamScore(Color color,int amount){
-        map.put(color,amount);
+        map.put(color,amount+this.getTeamScore(color));
     }
     public void start(){
         this.start=true;
@@ -290,23 +313,35 @@ public class Game {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                    Game.this.broadcast("游戏结束");
-
+System.out.print("游戏结束调试输出:正在进行");
                 start = false;
                 iswait = true;
                 for (Player p : getPlayers()) {
                     if(!p.isOnline()) continue;
-                    left(p);
-                }
-                for (Player p : getPlayers()) {
-                    if(!p.isOnline()) continue;
+                    safeLeave(p);
+                    System.out.print("游戏结束调试输出:"+p.getName());
                     p.sendMessage(ChatColor.BLUE + "========" + ChatColor.RED + "游戏结束" + ChatColor.BLUE + "========");
                     p.sendMessage(ChatColor.BLUE + "本次获得奖励:" + ChatColor.GREEN + (new User(p)).getScore());
                     p.sendMessage(ChatColor.BLUE + "本队得分:" + ChatColor.RED + getTeamScore(new User(p).getColor()));
                     p.sendMessage("蓝队得分:" + Game.this.getTeamScore(Color.BLUE) + "绿队得分:" + getTeamScore(Color.GREEN));
                     p.sendMessage("黄队得分:" + Game.this.getTeamScore(Color.YELLOW) + "红队得分:" + getTeamScore(Color.RED));
                 }
+                //清理残余
+                Bukkit.getScheduler().scheduleSyncDelayedTask(Main.handle, new Runnable(){
+                    public void run(){
+                    List<LivingEntity> l1 = spawn.getWorld().getLivingEntities();
+                LivingEntity le = null;
+                for (int i = 0; i < l1.size(); i++) {
+                    le = l1.get(i);
+                    if (le instanceof Sheep) {
+                        le.remove();
+                    }
+                }
                 players.clear();
+                Game.this.clearTeamScore();
+                System.out.print("完成");
+                }
+                        },10);
             }
         }.start();
         //小羊集合线程
@@ -323,6 +358,7 @@ public class Game {
         return players.contains(player);
     }
     public void join(Player player){
+        if(players.contains(player)){return;}
         if(!start) {
             if(players.size()>max){
                 player.sendMessage(ChatColor.AQUA+"人满为患,请换其他房间");
@@ -337,7 +373,7 @@ public class Game {
             Request req = new CarryRequst(this,player);
             GamePool.pushRequst(req);
             player.teleport(lobby);
-            if(players.size()>min){
+            if(players.size()>=min){
                 for(Player p:players){
                     p.sendMessage("人数已经达到要求游戏将在10秒内开始,请做好准备");
                     if(iswait){
@@ -359,14 +395,64 @@ public class Game {
     public List<Player> getPlayers(){
         return players;
     }
-    public void left(Player player){
+    public void left(final Player player){
         if(players.contains(player))
         players.remove(player);
         if(player.isOnline()) {
             player.teleport(GamePool.lobby);
             player.getInventory().clear();
+            player.getInventory().setHelmet(new ItemStack(Material.AIR));
+
+            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Main.handle, new Runnable(){
+                @Override
+                public void run() {
+
+                    Objective Obj = player.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+
+                    Scoreboard localScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+                    Obj = localScoreboard.registerNewObjective("swalk", "haha");
+                    Obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+                    Obj.setDisplayName("§a§l偷羊羊小游戏");
+                    player.setScoreboard(localScoreboard);
+
+
+                    Obj = player.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+                    Score s = Obj.getScore(Bukkit.getOfflinePlayer("§6期待你的下次胜利"));
+                    s.setScore(0);
+                }
+            }, 10);
+
         }
         //正在写
+    }
+    public void safeLeave(final Player player){
+        if(player.isOnline()) {
+            player.teleport(GamePool.lobby);
+            player.getInventory().clear();
+            player.getInventory().setHelmet(new ItemStack(Material.AIR));
+
+            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Main.handle, new Runnable(){
+                @Override
+                public void run() {
+
+                    Objective Obj = player.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+
+                    Scoreboard localScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+                    Obj = localScoreboard.registerNewObjective("swalk", "haha");
+                    Obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+                    Obj.setDisplayName("§a§l偷羊羊小游戏");
+                    player.setScoreboard(localScoreboard);
+
+
+                    Obj = player.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+                    Score s = Obj.getScore(Bukkit.getOfflinePlayer("§6期待你的下次胜利"));
+                    s.setScore(0);
+                }
+            }, 10);
+
+        }
+        //正在写
+    
     }
 
     @Override
