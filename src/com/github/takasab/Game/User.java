@@ -53,8 +53,15 @@ public class User {
         LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
         meta.setColor(color);
         item.setItemMeta(meta);
+
+        ItemStack item2 = new ItemStack(Material.LEATHER_CHESTPLATE);
+        LeatherArmorMeta meta2 = (LeatherArmorMeta) item2.getItemMeta();
+        meta2.setColor(color);
+        item2.setItemMeta(meta2);
+
         hm.put(player,color);
         player.getInventory().setHelmet(item);
+        player.getInventory().setChestplate(item2);
     }
     public int getPassagerNum(){
         Easycounter easycounter = new Easycounter();

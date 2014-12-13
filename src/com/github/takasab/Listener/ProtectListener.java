@@ -47,9 +47,14 @@ void onDied(EntityDamageByEntityEvent event){
           if(event.getDamager() instanceof Player) {
               GamePool.getPlayerIn(p).broadcast(ChatColor.RED+"玩家 " + p.getName() + " 被 "+((Player) event.getDamager()).getName()+" 杀死");
               Player killer = (Player) event.getDamager();
-              killer.sendMessage("你成功杀死玩家 "+p.getName()+" 获得 1 积分");
+              killer.sendMessage("你成功杀死玩家 "+p.getName()+" 获得 2 积分");
+              if(!GamePool.getPlayerIn(killer).gamefirst){
+                  GamePool.getPlayerIn(killer).broadcast(ChatColor.BOLD+"玩家 "+killer.getName()+ " 首杀");
+                  killer.sendMessage("首杀额外获得: 2 积分");
+                  new User(killer).addScore(2);
+              }
               User user = new User(killer);
-              user.addScore(1);
+              user.addScore(2);
           }
         }
     }

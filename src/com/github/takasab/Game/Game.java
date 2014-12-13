@@ -9,10 +9,7 @@ import net.minecraft.server.v1_7_R1.EntityInsentient;
 import net.minecraft.server.v1_7_R1.Navigation;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftLivingEntity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -36,6 +33,8 @@ public class Game {
     String name;
     int max;
     int min;
+
+    public boolean gamefirst=false;
 
     int gametick=0;
 
@@ -103,9 +102,10 @@ public class Game {
             @Override
             public void run() {
                 if (Game.this.start) {
+                    Player player =null;
 
                     for (Player p : players) {
-
+                        player = p;
                         Objective Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
 
                         Scoreboard localScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
@@ -131,10 +131,33 @@ public class Game {
                         y.setScore(Game.this.getTeamScore(Color.YELLOW));
                         w.setScore(Game.this.gametick);
                     }
+                    int blue = 0;
+                    int green =0;
+                    int yellow = 0;
+                    int red = 0;
+                    if(player!=null){
+                        if(player.isOnline()){
+                            List<Entity> list = player.getNearbyEntities(350,350,350);
+                            for(Entity entity:list){
+                                if(entity instanceof Sheep){
+                                    Sheep sheep = (Sheep) entity;
+                                    Color thissheep = ColorTool.getByID(ColorTool.getDyeToColorID(sheep.getColor()));
+                                    if(thissheep.equals(Color.GREEN)) green++;
+                                    if(thissheep.equals(Color.BLUE)) blue++;
+                                    if(thissheep.equals(Color.YELLOW)) yellow++;
+                                    if(thissheep.equals(Color.RED)) red++;
+                                }
+                            }
+                        }
+                    }
+                    setTeamScore(Color.BLUE,blue);
+                    setTeamScore(Color.GREEN,green);
+                    setTeamScore(Color.YELLOW,yellow);
+                    setTeamScore(Color.RED,red);
 
                 }
             }
-        }, 20, 20);
+        }, 10, 10);
         //小羊回家
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.handle, new Runnable(){
             @Override
@@ -202,6 +225,37 @@ public class Game {
         job.put(p,职业);
 
     }
+
+    public Color getMaxTeam(){
+        if(getTeamScore(Color.BLUE)>getTeamScore(Color.YELLOW)){
+            if(getTeamScore(Color.BLUE)>getTeamScore(Color.GREEN)){
+               if(getTeamScore(Color.BLUE)>getTeamScore(Color.RED)){
+                   return Color.BLUE;
+               }else{
+                   return Color.RED;
+               }
+            }else if(getTeamScore(Color.GREEN)>getTeamScore(Color.RED)){
+                 return Color.GREEN;
+            }else {
+                return Color.RED;
+            }
+
+        }else{
+            if(getTeamScore(Color.YELLOW)>getTeamScore(Color.GREEN)){
+                 if(getTeamScore(Color.YELLOW)>getTeamScore(Color.RED)){
+                     return Color.YELLOW;
+                 }else{
+                     return Color.RED;
+                 }
+            }else if(getTeamScore(Color.GREEN)>getTeamScore(Color.RED)){
+                return Color.GREEN;
+            }else {
+                return Color.RED;
+            }
+            }
+        }
+
+
     public String 获取玩家职业(Player p){
         return job.get(p);
     }
@@ -224,6 +278,9 @@ public class Game {
     public int getTeamScore(Color c){
         if(!map.containsKey(c)) return 0;
         return map.get(c);
+    }
+    public void setTeamScore(Color color, int i){
+        map.put(color,i);
     }
     public void clearTeamScore(){
         map.put(Color.BLUE, 0);
@@ -258,7 +315,8 @@ public class Game {
             User user = new User(p);
             p.teleport(this.getTeamSpawn(user.getColor()));
             if(!job.containsKey(p)){
-                p.getInventory().setItem(0, new ItemStack(Material.WOOD_SWORD));
+                job.put(p,"berserker")
+                p.getInventory().setItem(0, new ItemStack(Material.STONE_AXE));
                      ItemStack saddle = new  ItemStack(Material.SADDLE);
             ItemMeta me = saddle.getItemMeta();
             me.setDisplayName(ChatColor.RED+"神奇的马鞍");
@@ -316,9 +374,18 @@ public class Game {
 System.out.print("游戏结束调试输出:正在进行");
                 start = false;
                 iswait = true;
+                gamefirst = false;
                 for (Player p : getPlayers()) {
                     if(!p.isOnline()) continue;
                     safeLeave(p);
+                    User user = new User(p);
+                    if(user.getColor().equals(getMaxTeam())){
+                        p.sendMessage("恭喜你们队伍获胜 获得10积分奖励");
+                        user.addScore(10);
+                    }
+                    p.sendMessage("游戏结束获得参与积分:10");
+
+                    user.addScore(10);
                     System.out.print("游戏结束调试输出:"+p.getName());
                     p.sendMessage(ChatColor.BLUE + "========" + ChatColor.RED + "游戏结束" + ChatColor.BLUE + "========");
                     p.sendMessage(ChatColor.BLUE + "本次获得奖励:" + ChatColor.GREEN + (new User(p)).getScore());
@@ -385,7 +452,7 @@ System.out.print("游戏结束调试输出:正在进行");
         }
     }
     public void died(Player player){
-        player.sendMessage(ChatColor.RED+"你死亡了,扣除一积分,请继续加油.你将暂停行动5秒,请耐心等待");
+        player.sendMessage(ChatColor.RED+"你死亡了,请继续加油.你将暂停行动5秒,请耐心等待");
         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,20*5,20*5));
         player.setHealth(player.getMaxHealth());
         User user = new User(player);

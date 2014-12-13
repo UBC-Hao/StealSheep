@@ -3,6 +3,7 @@ package com.github.takasab.Listener;
 import com.github.takasab.Game.ColorTool;
 import com.github.takasab.Game.GamePool;
 import com.github.takasab.Game.User;
+import org.bukkit.Effect;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,9 +30,11 @@ public class PlaceEvent implements Listener{
         if(p.getLocation().getBlock().getRelative(0, -1, 0).getData()==(ColorTool.getColorID(user.getColor()))){
         if(p.getPassenger().getType() == EntityType.SHEEP){
             System.out.print("drop");
-            GamePool.getPlayerIn(p).addTeamScore(user.getColor(),user.getPassagerNum());
             user.leaveWithColor();
-           
+            int amount = user.getPassagerNum();
+            user.addScore(amount);
+            p.sendMessage("偷回 "+amount+" 只羊"+",获得同等数量积分");
+            p.getLocation().getWorld().playEffect(p.getLocation(), Effect.MOBSPAWNER_FLAMES,6);
         }
         }
      }
