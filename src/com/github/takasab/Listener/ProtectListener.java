@@ -29,6 +29,8 @@ public class ProtectListener implements Listener{
     void onLogin(PlayerJoinEvent event){
         event.getPlayer().getInventory().clear();
         event.getPlayer().teleport(GamePool.lobby);
+        event.getPlayer().getInventory().setHelmet(null);
+        event.getPlayer().getInventory().setChestplate(null);
     }
     @EventHandler
     void onLeave(PlayerQuitEvent event){
@@ -47,18 +49,32 @@ void onDied(EntityDamageByEntityEvent event){
           if(event.getDamager() instanceof Player) {
               GamePool.getPlayerIn(p).broadcast(ChatColor.RED+"玩家 " + p.getName() + " 被 "+((Player) event.getDamager()).getName()+" 杀死");
               Player killer = (Player) event.getDamager();
-              killer.sendMessage("你成功杀死玩家 "+p.getName()+" 获得 2 积分");
+              killer.sendMessage("你成功杀死玩家 "+p.getName()+" 获得 1 积分");
               if(!GamePool.getPlayerIn(killer).gamefirst){
                   GamePool.getPlayerIn(killer).broadcast(ChatColor.BOLD+"玩家 "+killer.getName()+ " 首杀");
                   killer.sendMessage("首杀额外获得: 2 积分");
+                  GamePool.getPlayerIn(killer).gamefirst=true;
                   new User(killer).addScore(2);
               }
               User user = new User(killer);
-              user.addScore(2);
+              user.addScore(1);
           }
         }
     }
 }
+
+@EventHandler
+void onDied(EntityDamageByBlockEvent event){
+    if(!(event.getEntity() instanceof Player)){return;}
+    Player p = (Player) event.getEntity();
+    if(GamePool.getPlayerIn(p)!=null){
+        if(p.getHealth()-event.getDamage()<=0){
+          GamePool.getPlayerIn(p).died(p);
+          GamePool.getPlayerIn(p).broadcast("玩家 "+p.getName()+" 死亡");
+        }
+    }
+}
+
 @EventHandler
 void onSheep(EntityDamageByEntityEvent event){
 if(event.getEntity() instanceof Sheep)
@@ -148,17 +164,6 @@ if(event.getEntity() instanceof Sheep)
             if(GamePool.getPlayerIn((Player)event.getEntity())!=null){
                 User user = new User((Player)event.getEntity());
                 if(GamePool.getPlayerIn((Player)event.getEntity())==null)return;
-                if(event.getDamager() instanceof Player){
-                    User damager = new User((Player) event.getDamager());
-                    if((user.getColor()==null)&&(damager.getColor()==null))
-                        return;
-                    if(user.getColor().equals(damager.getColor())){
-                        event.setCancelled(
-                                true
-                        );
-                        return;
-                    }
-                }
                 user.leaveSheep();
             }
         }

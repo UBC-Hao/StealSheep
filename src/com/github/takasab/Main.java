@@ -7,6 +7,8 @@ import com.github.takasab.Listener.ProtectListener;
 import com.github.takasab.Setting.EasySetting;
 import com.github.takasab.command.TestCommand;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -51,5 +53,19 @@ public class Main extends JavaPlugin{
                }
            }
        }.start();
+   }
+   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
+       if (sender instanceof Player) {
+           if (args == null) return false;
+           if(args.length<=0) return false;
+           Player player = (Player) sender;
+           if (GamePool.getGame(args[0]) == null) {
+               player.sendMessage("不正确的游戏房间");
+               return true;
+           }
+           GamePool.getGame(args[0]).join(player);
+           return true;
+       }
+       return false;
    }
 }

@@ -30,8 +30,9 @@ public class PlaceEvent implements Listener{
         if(p.getLocation().getBlock().getRelative(0, -1, 0).getData()==(ColorTool.getColorID(user.getColor()))){
         if(p.getPassenger().getType() == EntityType.SHEEP){
             System.out.print("drop");
-            user.leaveWithColor();
             int amount = user.getPassagerNum();
+            user.leaveWithColor();
+            
             user.addScore(amount);
             p.sendMessage("偷回 "+amount+" 只羊"+",获得同等数量积分");
             p.getLocation().getWorld().playEffect(p.getLocation(), Effect.MOBSPAWNER_FLAMES,6);

@@ -1,4 +1,4 @@
-﻿package com.github.takasab.Game;
+package com.github.takasab.Game;
 
 import com.github.takasab.GameProcess.Request;
 import com.github.takasab.GameProcess.StartThread;
@@ -54,6 +54,7 @@ public class Game {
     List<Player> players = new ArrayList<Player>();
     HashMap<Player,String> job = new HashMap<Player, String>();
 
+    HashMap<Player,Integer> scoremap = new  HashMap<Player,Integer> ();
     Game(String name,int min,int max,
     Location blue,Location green,Location yellow,Location red,Location sheep
     ,Location lobby,Location sheepblue,Location sheepgreen,Location sheepred,Location sheepyellow)
@@ -66,8 +67,7 @@ public class Game {
         public void run(){
            if(Game.this.start==false) return;
            Sheep le =  (Sheep) Game.this.spawn.getWorld().spawnCreature(spawn, EntityType.SHEEP);
-           Random rand = new Random();
-           if(rand.nextInt(100)>80) le.setColor(DyeColor.BLACK);
+   
         }
         }, 20*20, 20*20);
         /*
@@ -116,20 +116,21 @@ public class Game {
 
 
                         Obj = p.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
-                        Score s = Obj.getScore(Bukkit.getOfflinePlayer("§6玩家人数"));
-                        Score me = Obj.getScore(Bukkit.getOfflinePlayer("我的积分"));
-                        Score l = Obj.getScore(Bukkit.getOfflinePlayer("§6蓝队"));
-                        Score r = Obj.getScore(Bukkit.getOfflinePlayer("§6红队"));
-                        Score g = Obj.getScore(Bukkit.getOfflinePlayer("§6绿队"));
-                        Score y = Obj.getScore(Bukkit.getOfflinePlayer("§6黄队"));
-                        Score w = Obj.getScore(Bukkit.getOfflinePlayer("§6剩余时间"));
-                        s.setScore(players.size());
-                        me.setScore(new User(p).getScore());
-                        l.setScore(Game.this.getTeamScore(Color.BLUE));
-                        r.setScore(Game.this.getTeamScore(Color.RED));
-                        g.setScore(Game.this.getTeamScore(Color.GREEN));
-                        y.setScore(Game.this.getTeamScore(Color.YELLOW));
-                        w.setScore(Game.this.gametick);
+                        Score s = Obj.getScore(Bukkit.getOfflinePlayer(players.size()+" §6玩家人数"));
+                        Score me = Obj.getScore(Bukkit.getOfflinePlayer(new User(p).getScore()+" §6我的积分"));
+                        Score l = Obj.getScore(Bukkit.getOfflinePlayer(""+Game.this.getTeamScore(Color.BLUE)+ChatColor.BLUE+" 蓝队"));
+                        Score r = Obj.getScore(Bukkit.getOfflinePlayer(""+Game.this.getTeamScore(Color.RED)+ChatColor.RED+" 红队"));
+                        Score g = Obj.getScore(Bukkit.getOfflinePlayer(""+Game.this.getTeamScore(Color.GREEN)+ChatColor.GREEN+" 绿队"));
+                        Score y = Obj.getScore(Bukkit.getOfflinePlayer(""+Game.this.getTeamScore(Color.YELLOW)+ChatColor.YELLOW+" 黄队"));
+                        Score w = Obj.getScore(Bukkit.getOfflinePlayer(""+Game.this.gametick+" §6剩余时间"));
+                        
+                        s.setScore(7);
+                        me.setScore(5);
+                        l.setScore(4);
+                        r.setScore(3);
+                        g.setScore(2);
+                        y.setScore(1);
+                        w.setScore(6);
                     }
                     int blue = 0;
                     int green =0;
@@ -315,7 +316,7 @@ public class Game {
             User user = new User(p);
             p.teleport(this.getTeamSpawn(user.getColor()));
             if(!job.containsKey(p)){
-                job.put(p,"berserker")
+                job.put(p,"berserker");
                 p.getInventory().setItem(0, new ItemStack(Material.STONE_AXE));
                      ItemStack saddle = new  ItemStack(Material.SADDLE);
             ItemMeta me = saddle.getItemMeta();
@@ -323,6 +324,7 @@ public class Game {
             saddle.setItemMeta(me);
             p.getInventory().setItem(1, saddle);
             p.updateInventory();
+             scoremap.put(p, user.getScore());
                 continue;
             }
             String 职业 = job.get(p);
@@ -341,6 +343,7 @@ public class Game {
             saddle.setItemMeta(me);
             p.getInventory().setItem(1, saddle);
             p.updateInventory();
+            scoremap.put(p, user.getScore());
             
         }
 
@@ -379,6 +382,16 @@ System.out.print("游戏结束调试输出:正在进行");
                     if(!p.isOnline()) continue;
                     safeLeave(p);
                     User user = new User(p);
+
+                    System.out.print("游戏结束调试输出:"+p.getName());
+                    p.getInventory().setChestplate(null);
+                    
+                    p.sendMessage(ChatColor.BLUE + "===========================" + ChatColor.RED + "游戏结束" + ChatColor.BLUE + "===========================");
+                    
+                    p.sendMessage(ChatColor.BLUE + "获得积分:" + ChatColor.GREEN + (user.getScore()-scoremap.get(p)));
+                    p.sendMessage(ChatColor.BLUE + "本队得分:" + ChatColor.RED + getTeamScore(user.getColor()));
+                    p.sendMessage(ChatColor.BLUE+"蓝队得分:" + Game.this.getTeamScore(Color.BLUE) + ChatColor.GREEN+"                        绿队得分:" + getTeamScore(Color.GREEN));
+                    p.sendMessage(ChatColor.YELLOW+"黄队得分:" + Game.this.getTeamScore(Color.YELLOW) +ChatColor.RED+ "                        红队得分:" + getTeamScore(Color.RED));
                     if(user.getColor().equals(getMaxTeam())){
                         p.sendMessage("恭喜你们队伍获胜 获得10积分奖励");
                         user.addScore(10);
@@ -386,29 +399,25 @@ System.out.print("游戏结束调试输出:正在进行");
                     p.sendMessage("游戏结束获得参与积分:10");
 
                     user.addScore(10);
-                    System.out.print("游戏结束调试输出:"+p.getName());
-                    p.sendMessage(ChatColor.BLUE + "========" + ChatColor.RED + "游戏结束" + ChatColor.BLUE + "========");
-                    p.sendMessage(ChatColor.BLUE + "本次获得奖励:" + ChatColor.GREEN + (new User(p)).getScore());
-                    p.sendMessage(ChatColor.BLUE + "本队得分:" + ChatColor.RED + getTeamScore(new User(p).getColor()));
-                    p.sendMessage("蓝队得分:" + Game.this.getTeamScore(Color.BLUE) + "绿队得分:" + getTeamScore(Color.GREEN));
-                    p.sendMessage("黄队得分:" + Game.this.getTeamScore(Color.YELLOW) + "红队得分:" + getTeamScore(Color.RED));
+                 
                 }
                 //清理残余
-                Bukkit.getScheduler().scheduleSyncDelayedTask(Main.handle, new Runnable(){
-                    public void run(){
-                    List<LivingEntity> l1 = spawn.getWorld().getLivingEntities();
-                LivingEntity le = null;
-                for (int i = 0; i < l1.size(); i++) {
-                    le = l1.get(i);
-                    if (le instanceof Sheep) {
-                        le.remove();
+                Bukkit.getScheduler().scheduleSyncDelayedTask(Main.handle, new Runnable() {
+                    public void run() {
+                        List<LivingEntity> l1 = spawn.getWorld().getLivingEntities();
+                        LivingEntity le = null;
+                        for (int i = 0; i < l1.size(); i++) {
+                            le = l1.get(i);
+                            if (le instanceof Sheep) {
+                                le.remove();
+                            }
+                        }
+                        players.clear();
+                        Game.this.clearTeamScore();
+                        scoremap.clear();
+                        System.out.print("完成");
                     }
-                }
-                players.clear();
-                Game.this.clearTeamScore();
-                System.out.print("完成");
-                }
-                        },10);
+                }, 10);
             }
         }.start();
         //小羊集合线程
@@ -469,6 +478,7 @@ System.out.print("游戏结束调试输出:正在进行");
             player.teleport(GamePool.lobby);
             player.getInventory().clear();
             player.getInventory().setHelmet(new ItemStack(Material.AIR));
+            player.getInventory().setChestplate(new ItemStack(Material.AIR));
 
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Main.handle, new Runnable(){
                 @Override
@@ -485,7 +495,7 @@ System.out.print("游戏结束调试输出:正在进行");
 
                     Obj = player.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
                     Score s = Obj.getScore(Bukkit.getOfflinePlayer("§6期待你的下次胜利"));
-                    s.setScore(0);
+                    s.setScore(1);
                 }
             }, 10);
 

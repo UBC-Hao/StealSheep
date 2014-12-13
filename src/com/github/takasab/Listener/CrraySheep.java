@@ -13,6 +13,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.Random;
+
 
 /*
  *@author:yudi
@@ -34,14 +36,18 @@ public class CrraySheep implements Listener{
                     Sheep target = (Sheep) event.getRightClicked();
                     CraftLivingEntity cl = (CraftLivingEntity) target;
                     if(cl.getHandle().vehicle!=null) return;
-                    if(target.getColor()== DyeColor.BLACK){
+                    Random rand  = new Random();
+                    if(target.getColor().equals(DyeColor.WHITE)){
+                    if(rand.nextInt(100)<20){
+                        
                         target.getWorld().createExplosion(target.getLocation(),0);
                         target.remove();
                         user.leaveSheep();
                         Game game = GamePool.getPlayerIn(event.getPlayer());
                         game.died(event.getPlayer());
-                        
+                        event.getPlayer().sendMessage("会爆炸的白羊???死了···");
                         return;
+                    }
                     }
                     if(ColorTool.getDyeToColorID(target.getColor())==
                             ColorTool.getColorID(user.getColor())){
